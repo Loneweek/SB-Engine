@@ -38,22 +38,6 @@ typedef AnimArray = {
 	var offsets:Array<Int>;
 	var closeBtn:flixel.ui.FlxButton;
 
-// Position the button (X: 20, Y: 20) with the text "Close Window"
-closeBtn = new flixel.ui.FlxButton(20, 20, "Close Window", function() {
-    // Play a click sound effect
-    FlxG.sound.play(Paths.sound('cancelMenu'));
-    
-    // Switch the state back to the Freeplay or Main Menu State
-    MusicBeatState.switchState(new FreeplayState()); 
-});
-
-// Format the button style so it stands out
-closeBtn.label.setFormat(Paths.font("vcr.ttf"), 16, flixel.util.FlxColor.BLACK, CENTER);
-add(closeBtn);
-
-// Ensure the mouse cursor is visible so the player can click it
-FlxG.mouse.visible = true;
-
 }
 
 class Character extends FlxSprite
