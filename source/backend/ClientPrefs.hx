@@ -10,6 +10,8 @@ import states.TitleState;
 @:structInit class SaveVariables {
 	public var opponentAfterimages:Bool = false;
     public var playerAfterimages:Bool = false;
+	public var showcaseMode:Bool = false;
+	public var uiFont:String = 'VCR OSD Mono';
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
