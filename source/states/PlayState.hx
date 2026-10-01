@@ -83,10 +83,10 @@ class PlayState extends MusicBeatState
 		['Bruh', 0.6], //From 50% to 59%
 		['Meh', 0.69], //From 60% to 68%
 		['Nice', 0.7], //69%
-		['Good', 0.8], //From 70% to 79%
-		['Great', 0.9], //From 80% to 89%
-		['Sick!', 1], //From 90% to 99%
-		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
+		['Great', 0.8], //From 70% to 85%
+		['Amazing', 0.9], //From 85% to 92%
+		['INCREDIBLE', 1], //From 92% to 99%
+		['OUTSTANDING!!!!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	];
 
 	//event variables
@@ -188,6 +188,8 @@ class PlayState extends MusicBeatState
 	private var updateTime:Bool = true;
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
+	public static var sbWatermark:FlxText;
+
 
 	//Gameplay settings
 	public var healthGain:Float = 1;
