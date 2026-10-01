@@ -15,6 +15,14 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	{
 		title = Language.getPhrase('visuals_menu', 'Visuals Settings');
 		rpcTitle = 'Visuals Settings Menu'; //for Discord Rich Presence
+		var fontOptions:Array<String> = ['Comic Sans MS', 'VCR OSD Mono', 'Serif'];
+var option:Option = new Option('Font',
+    'Choose the font style used across the gameplay user interface.',
+    'uiFont',
+    'string',
+    fontOptions);
+addOption(option);
+
 
 		// for note skins and splash skins
 		notes = new FlxTypedGroup<StrumNote>();
