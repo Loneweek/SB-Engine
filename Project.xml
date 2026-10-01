@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': SB Engine" file="SBE" packageName="com.Loneweek.SBE" package="com.Loneweek."SBE" main="Main" version="0.0.9" company="Loneweek" />
+<app title="SB Engine" file="SB_Engine" main="Main" version="1" company="ShadowMario" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
