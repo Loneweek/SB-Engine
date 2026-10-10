@@ -106,7 +106,7 @@ weekThing.y = ((weekThing.height + 20) * num);
 				weekThing.ID = num;
 				weekThing.targetY = itemTargetY;
 				itemTargetY += Math.max(weekThing.height, 110) + 10;
-				grpWeekText.add(weekThing);
+grpWeekText.add(weekThing);
                 		weekThing.alpha = 0;
 		weekThing.scale.set(0.5, 0.5);
 		weekThing.x = -500 - (i * 120);
