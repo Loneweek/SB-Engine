@@ -353,6 +353,50 @@ class MainMenuState extends MusicBeatState
 
 	function changeItem(change:Int = 0)
 	{
+		if (change != 0) curColumn = CENTER;
+		curSelected = FlxMath.wrap(curSelected + change, 0, optionShit.length - 1);
+		FlxG.sound.play(Paths.sound('scrollMenu'));
+
+		// Define the selected item beforehand
+		var selectedItem:FlxSprite = menuItems.members[curSelected];
+
+		for (item in menuItems)
+		{
+			item.animation.play('idle');
+			item.centerOffsets();
+			
+			// Stop any overlapping animations
+			FlxTween.cancelTweensOf(item);
+
+			if (item == selectedItem)
+			{
+				// Selected option scales UP and stays completely solid
+				item.animation.play('selected');
+				FlxTween.tween(item.scale, {x: 1.5, y: 1.5}, 0.25, {ease: FlxEase.quadOut});
+				FlxTween.tween(item, {alpha: 1.0}, 0.25, {ease: FlxEase.quadOut});
+				item.centerOffsets();
+			}
+			else
+			{
+				// Unselected options shrink completely to 0 and turn invisible
+				FlxTween.tween(item.scale, {x: 0.0, y: 0.0}, 0.25, {ease: FlxEase.quadIn});
+				FlxTween.tween(item, {alpha: 0.0}, 0.25, {ease: FlxEase.quadIn});
+			}
+		}
+
+		switch(curColumn)
+		{
+			case CENTER:
+				selectedItem = menuItems.members[curSelected];
+			case LEFT:
+				selectedItem = leftItem;
+			case RIGHT:
+				selectedItem = rightItem;
+		}
+
+		camFollow.y = selectedItem.getGraphicMidpoint().y;
+	}
+	{
 		if(change != 0) curColumn = CENTER;
 		curSelected = FlxMath.wrap(curSelected + change, 0, optionShit.length - 1);
 		FlxG.sound.play(Paths.sound('scrollMenu'));
