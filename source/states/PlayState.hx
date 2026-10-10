@@ -1247,6 +1247,25 @@ class PlayState extends MusicBeatState
 		setSongTime(Math.max(0, startOnTime - 500) + Conductor.offset);
 		startOnTime = 0;
 
+		if (ClientPrefs.data.iconBopStyle == 'SB Engine (Bopping.lua)') {
+    var lerpVal:Float = FlxMath.bound(elapsed * 10, 0, 1);
+    iconP1.angle += (0 - iconP1.angle) * lerpVal;
+    iconP2.angle += (0 - iconP2.angle) * lerpVal;
+    iconP1.scale.x += (1 - iconP1.scale.x) * lerpVal;
+    iconP1.scale.y += (1 - iconP1.scale.y) * lerpVal;
+    iconP2.scale.x += (1 - iconP2.scale.x) * lerpVal;
+    iconP2.scale.y += (1 - iconP2.scale.y) * lerpVal;
+    iconP1.updateHitbox();
+    iconP2.updateHitbox();
+} else {
+    var mult:Float = FlxMath.lerp(1, iconP1.scale.x, FlxMath.bound(1 - (elapsed * 9), 0, 1));
+    iconP1.scale.set(mult, mult);
+    iconP1.updateHitbox();
+    var mult2:Float = FlxMath.lerp(1, iconP2.scale.x, FlxMath.bound(1 - (elapsed * 9), 0, 1));
+    iconP2.scale.set(mult2, mult2);
+    iconP2.updateHitbox();
+}
+
 		if(paused) {
 			//trace('Oopsie doopsie! Paused sound');
 			FlxG.sound.music.pause();
@@ -2936,6 +2955,18 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+	if (ClientPrefs.data.iconBopStyle == 'SB Engine (Bopping.lua)') {
+    var oppIconDir:Float = (curBeat % 2 == 0) ? -1 : 1;
+    iconP2.angle = oppIconDir * 25;
+    iconP1.angle = -oppIconDir * 25;
+    iconP2.scale.set(1.2, 1.3);
+    iconP1.scale.set(1.2, 1.3);
+} else {
+    iconP1.scale.set(1.2, 1.2);
+    iconP2.scale.set(1.2, 1.2);
+}
+
 
 		if(instakillOnMiss)
 		{
