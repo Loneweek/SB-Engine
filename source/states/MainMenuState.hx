@@ -233,6 +233,32 @@ class MainMenuState extends MusicBeatState
 			{
 				case CENTER:
 					if(controls.UI_LEFT_P && leftOption != null)
+									if (optionShit[curSelected] == 'engine_changer')
+				{
+					var engines:Array<String> = [
+						'SB Engine', 'Kade Engine', 'Psych Engine', 'OS Engine', 
+						'JS Engine', 'Codename Engine', 'Leather Engine', 
+						'Forever Engine', 'Vanilla Engine', 'H-Slice HRK', 'Dendy Engine'
+					];
+					var currentIdx:Int = engines.indexOf(ClientPrefs.data.engineTheme);
+
+					if (controls.UI_LEFT_P) {
+						currentIdx--;
+						if (currentIdx < 0) currentIdx = engines.length - 1;
+						ClientPrefs.data.engineTheme = engines[currentIdx];
+						ClientPrefs.saveSettings();
+						FlxG.sound.play(Paths.sound('scrollMenu'));
+					}
+					else if (controls.UI_RIGHT_P) {
+						currentIdx++;
+						if (currentIdx >= engines.length) currentIdx = 0;
+						ClientPrefs.data.engineTheme = engines[currentIdx];
+						ClientPrefs.saveSettings();
+						FlxG.sound.play(Paths.sound('scrollMenu'));
+					}
+				}
+				else
+
 					{
 						curColumn = LEFT;
 						changeItem();
