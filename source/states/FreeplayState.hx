@@ -115,7 +115,7 @@ class FreeplayState extends MusicBeatState
 		{
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.targetY = i;
-			grpSongs.add(songText);
+		songText.x = FlxG.width + 200 + (i * 75);
 
 			songText.scaleX = Math.min(1, 980 / songText.width);
 			songText.snapToPosition();
