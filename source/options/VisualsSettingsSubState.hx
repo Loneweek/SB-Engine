@@ -57,7 +57,14 @@ addOption(option);
 			addOption(option);
 			option.onChange = onChangeNoteSkin;
 			noteOptionID = optionsArray.length - 1;
-		}
+		var bopOptions:Array<String> = ['SB Engine (Bopping.lua)', 'Psych (Base)'];
+var option:Option = new Option('Icon Bop Animation',
+    'Choose the style of animation your icons use when bopping to the beat.',
+    'iconBopStyle',
+    'string',
+    bopOptions);
+addOption(option);
+
 		
 		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
 		if(noteSplashes.length > 0)
