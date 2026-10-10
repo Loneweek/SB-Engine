@@ -259,7 +259,16 @@ class FreeplayState extends MusicBeatState
 					curSelected = songs.length - 1;
 					changeSelection();
 					holdTime = 0;	
-				}
+				}		if (FlxG.keys.justPressed.SPACE)
+		{
+			FlxG.sound.music.stop();
+			destroyFreeplayVocals();
+			var songLower:String = Paths.formatToSongPath(songs[curSelected].songName);
+			var poop:String = Highscore.formatSong(songLower, curDifficulty);
+			PlayState.SONG = Song.loadFromJson(poop, songLower);
+			FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0.7);
+		}
+
 				if (controls.UI_UP_P)
 				{
 					changeSelection(-shiftMult);
