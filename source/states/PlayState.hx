@@ -172,12 +172,16 @@ class PlayState extends MusicBeatState
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 	
-	// Custom SB Engine HUD text pointers
+	// Custom SB Engine HUD UI Elements & Persistent Tracking Counters
 	public static var sbWatermark:FlxText;
 	var sbMetaDataTxt:FlxText;
+	var customHealthInfo:FlxText;
+	var missWarning:FlxText;
+	
 	var continuousHighScore:Int = 0;
 	var bestHitMilliseconds:Float = 999.0;
 	var maxNpsRecord:Int = 0;
+	var missWarningScaleTimer:Float = 0;
 
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
@@ -255,7 +259,7 @@ class PlayState extends MusicBeatState
 
 	function createPost()
 	{
-		// Render and position custom metadata element at screen floor bound
+		// 1. Core Bottom-Left Metadata Field Setup
 		sbMetaDataTxt = new FlxText(12, FlxG.height - 24, 0, "", 16);
 		sbMetaDataTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		sbMetaDataTxt.scrollFactor.set();
@@ -263,13 +267,58 @@ class PlayState extends MusicBeatState
 		sbMetaDataTxt.cameras = [camHUD];
 		sbMetaDataTxt.visible = !ClientPrefs.data.hideHud;
 		add(sbMetaDataTxt);
+
+		// 2. Custom Live Health Tracker Object Setup
+		customHealthInfo = new FlxText(20, 20, 1280, "Health: 50%", 20);
+		customHealthInfo.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		customHealthInfo.scrollFactor.set();
+		customHealthInfo.borderSize = 1.25;
+		customHealthInfo.cameras = [camHUD];
+		customHealthInfo.visible = !ClientPrefs.data.hideHud;
+		add(customHealthInfo);
+
+		// 3. Screen-Centered Miss Warning Popup Setup
+		missWarning = new FlxText(0, 0, 1280, "Miss!", 40);
+		missWarning.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		missWarning.scrollFactor.set();
+		missWarning.borderSize = 2;
+		missWarning.cameras = [camHUD];
+		missWarning.screenCenter();
+		missWarning.alpha = 0;
+		add(missWarning);
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		// Handle live icon rotation and scaling adjustments if custom setting is chosen
+		// 1. Live Frame Update Calculations for Adaptive Health Percentage Display
+		if (customHealthInfo != null && !cpuControlled) {
+			var currentHealth:Int = Std.int(Math.max(0, Math.min(100, Math.floor((health / 2) * 100))));
+			customHealthInfo.text = "Health: " + currentHealth + "%";
+
+			if (currentHealth >= 75)
+				customHealthInfo.color = FlxColor.GREEN;
+			else if (currentHealth < 25)
+				customHealthInfo.color = FlxColor.RED;
+			else
+				customHealthInfo.color = FlxColor.WHITE;
+		}
+
+		// 2. Clear Visual Popups and Decay Opacity Alpha Levels Frame-by-Frame
+		if (missWarning != null && missWarning.alpha > 0) {
+			missWarning.alpha -= (elapsed / 0.5);
+		}
+
+		// 3. Scale-Timer Handler for the Miss Warning Bounce Elastic Animation Effect
+		if (missWarningScaleTimer > 0) {
+			missWarningScaleTimer -= elapsed;
+			if (missWarningScaleTimer <= 0) {
+				missWarning.scale.set(1, 1);
+			}
+		}
+
+		// 4. Live Tracking Icon Rotation and Scaling Setup
 		if (ClientPrefs.data.iconBopStyle == 'SB Engine (Bopping.lua)') {
 			var lerpVal:Float = FlxMath.bound(elapsed * 10, 0, 1);
 			iconP1.angle += (0 - iconP1.angle) * lerpVal;
@@ -278,80 +327,66 @@ class PlayState extends MusicBeatState
 			iconP1.scale.y += (1 - iconP1.scale.y) * lerpVal;
 			iconP2.scale.x += (1 - iconP2.scale.x) * lerpVal;
 			iconP2.scale.y += (1 - iconP2.scale.y) * lerpVal;
-			iconP1.updateHitbox();
-			iconP2.updateHitbox();
-		} else {
-			var mult:Float = FlxMath.lerp(1, iconP1.scale.x, FlxMath.bound(1 - (elapsed * 9), 0, 1));
-			iconP1.scale.set(mult, mult);
-			iconP1.updateHitbox();
-			var mult2:Float = FlxMath.lerp(1, iconP2.scale.x, FlxMath.bound(1 - (elapsed * 9), 0, 1));
-			iconP2.scale.set(mult2, mult2);
-			iconP2.updateHitbox();
-		}
-	}
-
-	function beatHit()
-	{
-		super.beatHit();
-
-		// Custom sway scaling triggers for health icons on musical timestamps
-		if (ClientPrefs.data.iconBopStyle == 'SB Engine (Bopping.lua)') {
-			var oppIconDir:Float = (curBeat % 2 == 0) ? -1 : 1;
-			iconP2.angle = oppIconDir * 25;
-			iconP1.angle = -oppIconDir * 25;
-			iconP2.scale.set(1.2, 1.3);
-			iconP1.scale.set(1.2, 1.3);
-		} else {
-			iconP1.scale.set(1.2, 1.2);
-			iconP2.scale.set(1.2, 1.2);
-		}
-	}
-
-	function goodNoteHit(note:Note)
-	{
-		// Increment the active note hit highscore track
-		continuousHighScore += songScore;
-		
-		// Map timing offsets precisely in milliseconds
-		var noteMs:Float = Math.abs(note.strumTime - Conductor.songPosition);
-		if (noteMs < bestHitMilliseconds && noteMs > 0) {
-			bestHitMilliseconds = noteMs;
-		}
-		
-		// Psych Engine baseline afterimages toggle check
-		if (ClientPrefs.data.playerAfterimages) {
-			// Trigger player trail sprites here...
-		}
-	}
-
-	function noteMiss(note:Note)
-	{
-		// Force persistent score string sequence to instantly drop to zero on a miss
-		continuousHighScore = 0;
-	}
-
-	function recalculateRating()
-	{
-		// 1. Structural evaluation math for layout string accuracy tracking fields
-		var displayAccuracy:Float = 0;
-		if (totalPlayed > 0) {
-			displayAccuracy = FlxMath.roundDecimal(ratingPercent * 100, 2);
-		}
-
-		// 2. Validate maximum Notes-Per-Second record values
-		if (backend.BaseStage.nps > maxNpsRecord) {
-			maxNpsRecord = backend.BaseStage.nps;
-		}
-
-// 3. Clean fallback formatting evaluation string adjustments for timing values
+iconP1.updateHitbox();
+iconP2.updateHitbox();
+} else {
+var mult:Float = FlxMath.lerp(1, iconP1.scale.x, FlxMath.bound(1 - (elapsed * 9), 0, 1));
+iconP1.scale.set(mult, mult);
+iconP1.updateHitbox();
+var mult2:Float = FlxMath.lerp(1, iconP2.scale.x, FlxMath.bound(1 - (elapsed * 9), 0, 1));
+iconP2.scale.set(mult2, mult2);
+iconP2.updateHitbox();
+}
+}
+function beatHit()
+{
+super.beatHit();
+if (ClientPrefs.data.iconBopStyle == 'SB Engine (Bopping.lua)') {
+var oppIconDir:Float = (curBeat % 2 == 0) ? -1 : 1;
+iconP2.angle = oppIconDir * 25;
+iconP1.angle = -oppIconDir * 25;
+iconP2.scale.set(1.2, 1.3);
+iconP1.scale.set(1.2, 1.3);
+} else {
+iconP1.scale.set(1.2, 1.2);
+iconP2.scale.set(1.2, 1.2);
+}
+}
+function goodNoteHit(note:Note)
+{
+continuousHighScore += songScore;
+var noteMs:Float = Math.abs(note.strumTime - Conductor.songPosition);
+if (noteMs < bestHitMilliseconds && noteMs > 0) {
+bestHitMilliseconds = noteMs;
+}
+}
+function noteMiss(note:Note)
+{
+// Break the highscore combo string instantly
+continuousHighScore = 0;
+// Trigger Screen Center Notification Elastic Animation Bounces
+if (missWarning != null) {
+missWarning.alpha = 1;
+missWarning.scale.set(1.3, 1.3);
+missWarningScaleTimer = 0.05; // Recreates the 0.05s scale reset timer natively
+}
+}
+function recalculateRating()
+{
+var displayAccuracy:Float = 0;
+if (totalPlayed > 0) {
+displayAccuracy = FlxMath.roundDecimal(ratingPercent * 100, 2);
+}
+if (backend.BaseStage.nps > maxNpsRecord) {
+maxNpsRecord = backend.BaseStage.nps;
+}
 var msDisplay:String = (bestHitMilliseconds == 999.0) ? "0.00" : FlxMath.roundDecimal(bestHitMilliseconds, 2) + "ms";
-// 4. Update the core dashboard readout console elements dynamically
+// Update Custom Descriptive Layout Dashboard
 scoreTxt.text = "High Score: " + continuousHighScore
 + " / Misses: " + songMisses
 + " / Accuracy: " + displayAccuracy + "%"
 + " / Average: " + msDisplay
 + " / Nps: " + backend.BaseStage.nps + "/" + maxNpsRecord;
-// 5. Dynamic generation math for custom bottom-left information fields
 var myGrade:String = "Null";
 if (totalPlayed > 0) {
 var acc:Float = ratingPercent * 100;
